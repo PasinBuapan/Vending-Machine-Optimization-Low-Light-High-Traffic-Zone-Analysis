@@ -19,7 +19,7 @@ The database is structured into a star-like schema to optimize analytical querie
 ---
 
 ## 🔍 Key Insights from SQL Analysis (Verified Metrics) 
-🔗 [Click here to view Live Demo & Run Code on Google Colab](https://colab.research.google.com/drive/15jbEH3-GUm7wu2E5CMUJinTVOpVuKLNi#scrollTo=GPKmbvI0olzZ)
+🔗 [Click here to view Live Demo & Run Code on Google Colab](https://colab.research.google.com/drive/15jbEH3-GUm7wu2E5CMUJinTVOpVuKLNi?usp=sharing)
 
 <img width="558" height="393" alt="Mock data (Graph)" src="https://github.com/user-attachments/assets/56d48669-92d3-40f5-94ac-99f73201269e" />
 
