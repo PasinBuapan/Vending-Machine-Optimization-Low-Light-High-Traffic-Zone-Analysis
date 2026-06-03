@@ -1,51 +1,134 @@
-# 🥤 Vending Machine Optimization: Low-Light & High-Traffic Zone Analysis
+# 🥤 Vending Machine Performance Optimization in Hospital Corridor Environments
+**Exploratory Data Analysis of Environmental, Behavioral, and Product Mix Factors Affecting Low-Light Retail Performance**
 
-## 📌 Business Overview
-This project focuses on optimizing vending machine operations within a hospital environment, specifically targeting machines located in **low-light/walkway areas** during late-night shifts (**23:00 - 05:00**). Targeting late-night hospital shifts, primarily medical staff and shift workers who require high caffeine intake to sustain alert operations.
+## 📌 Project Overview
 
-The goal is to evaluate two main hypotheses to maximize sales revenue and operational efficiency:
-1. **Visibility Impact (The "Light" Hypothesis):** Installing LED strips on dark-zone machines to boost impulse buying and improve the customer experience.
-2. **Product Assortment Impact (The "Caffeine" Hypothesis):** Reallocating product slot ratios to favor high-demand caffeine drinks during night shifts, preventing stockouts.
+This project demonstrates exploratory data analysis and optimization thinking applied to vending machine performance in low-light, high-traffic hospital environments.
 
----
+The goal is to understand how environmental visibility, customer behavior patterns, and product mix influence sales performance and revenue distribution.
 
-## 📊 Data Architecture (Relational Schema)
-The database is structured into a star-like schema to optimize analytical queries using our simulated dataset (`vending_machine_sales_mock.csv`):
-* `Fact_Sales`: Stores granular transaction data including timestamps, quantities, topping selections, and revenue.
-* `Dim_Products`: Master data for beverages (`Caffeine`, `Soft Drinks`, `Juices`) and service types (`Hot` / `Cold`).
-* `Dim_Toppings`: Tailored add-ons for drinks to analyze upselling performance.
-* `Dim_Vending_Machines`: Captures environmental factors (`location_zone`, `is_low_light`, `has_led_strip`).
+The analysis is based on a simulated dataset designed to reflect realistic vending machine transactions and operational constraints.
 
 ---
+## 🎯 Business Problem
 
-## 🔍 Key Insights from SQL Analysis (Verified Metrics) 
+Vending machines placed in hospital walkways often operate under constraints that may affect sales performance:
+
+* Low visibility in dimly lit corridors
+* High concentration of shift workers during nighttime hours
+* Limited product selection and fixed inventory slots
+
+This project investigates:
+
+1. Does improving visibility (e.g., LED installation) impact sales performance?
+2. Which product categories perform best during late-night hours?
+3. What product and topping mix can maximize revenue in constrained vending environments?
+---
+## 🧱 Data Architecture
+The project uses a **star-schema data model** to support analytical querying using our simulated dataset (`vending_machine_sales_mock.csv`):
+* `Fact_Sales`: Transaction-level sales data. (timestamp, quantity, revenue, product, machine)
+* `Dim_Products`: Product master data. (category, price, menu type)
+* `Dim_Toppings`: Add-on products and upsell components.
+* `Dim_Vending_Machines`: Environmental attributes (location, lighting conditions, LED presence)
+This structure is designed to support scalable analytics across multiple dimensions: time, product, and environment.
+---
+## 🔍 Methodology
+
+The analysis follows a structured approach:
+
+### 1. Descriptive Analytics
+  * Sales performance by machine, product, and time
+  * Revenue and transaction distribution
+### 2. Segment Analysis
+  * Low-light vs LED-equipped machines
+  * Night-time (23:00–05:00) demand behavior
+  * Product category performance
+### 3. Cross-Dimensional Analysis
+  * Environment × performance (lighting vs sales)
+  * Location × machine efficiency
+### 4. Product Mix Analysis
+  * Product popularity
+  * Topping attachment behavior
+  * Revenue contribution by category
+---
+## 📊 Key Insights
 🔗 [Click here to view Live Demo & Run Code on Google Colab](https://colab.research.google.com/drive/15jbEH3-GUm7wu2E5CMUJinTVOpVuKLNi?usp=sharing)
+
+| ⚠️ Note: Results are based on simulated data and should be interpreted as directional insights.
 
 <img width="558" height="393" alt="Mock data (Graph)" src="https://github.com/user-attachments/assets/56d48669-92d3-40f5-94ac-99f73201269e" />
 
 
-### 1. 💡 Visibility Performance (A/B Testing Result)
-By querying sales performance in low-light areas, we compared a completely dark machine against an LED-retrofitted machine. Based on our 1,200 simulated transactions, the data proves that **improving machine visibility increases total revenue substantially** without needing to change the core product mix:
-* **LED-Retrofitted Machine (M002):** Generated **23,820.00 THB** (535 cups sold) with an average of 1.09 cups per transaction.
-* **Non-LED Machine (M001 - Dark Zone):** Generated only **12,320.00 THB** (288 cups sold).
-* **Business Impact:** Installing LED strips nearly doubled the sales revenue (**~93.3% increase**), validating the visibility hypothesis for low-light hospital walkways.
+### 💡 1. Visibility and Sales Performance (LED Hypothesis)
+Machines equipped with LED lighting in low-light zones showed **higher sales performance compared to non-LED machines** in the simulated dataset.
 
-### 2. ☕ Late-Night Category Demand (23:00 - 05:00)
-Time-series filtering confirmed that between **23:00 and 05:00**, the `Caffeine` category outperforms all other beverages by a wide margin, justifying a permanent slot reallocation for these high-margin items during night shifts:
-* **Caffeine:** Earned **13,330.00 THB** (256 cups sold across 234 transactions).
-* **Soft Drinks:** Earned **2,410.00 THB** (61 cups sold).[🔗 Click here to view Live Demo & Run Code on Google Colab]
-* **Juices:** Earned **385.00 THB** (11 cups sold).
-* **Business Impact:** Caffeine products represent **~82.6% of late-night revenue**, fully justifying a permanent inventory adjustment during peak medical shift hours.
+* LED-equipped machine (M002) showed higher revenue and transaction volume
+* Non-LED machine (M001) underperformed in comparable conditions
 
-### 3. 🎯 Add-on Optimization (Topping Analysis)
-Cross-analysis of transaction data revealed a notable attachment rate for specific toppings. This indicates a strong opportunity for upselling, proving that customers are willing to customize their drinks even during late-night hours:
-* **Extra Espresso Shot (T01):** Captured a **14.42% attachment rate** (173 orders), contributing an additional **2,745.00 THB** in extra revenue.
-* **Boba/Jelly (T02):** Captured an **8.08% attachment rate** (97 orders), contributing **1,050.00 THB**.
+**Insight**: Improved visibility may increase impulse purchasing behavior in low-light environments.
+
+### 2. ☕ Night-Time Demand Patterns (23:00 - 05:00)
+Late-night sales are heavily concentrated in **caffeine-based products**, reflecting shift-worker consumption behavior.
+
+* Caffeine products dominate night-time revenue share
+* Soft drinks and juices show significantly lower demand
+
+**Insight**: Inventory allocation for machines located in hospital corridor environments should be optimized toward caffeine-heavy product mix to align with observed night-time demand patterns.
+
+### 3. 🎯 Product & Upsell Behavior
+Topping analysis shows meaningful attachment behavior:
+
+* Extra espresso shots show the highest attachment rate
+* Add-ons contribute additional revenue per transaction
+
+**Insight**: Upselling opportunities exist even in low-interaction vending environments.
 
 ---
 
-## 💡 Recommended Actions
+## 💡 Recommendations
 
-* **Implement LED Retrofitting:** Deploy LED strips across all remaining low-light and walkway vending machines. Enhanced visibility not only drives impulse purchases (**potential 93% revenue lift** based on A/B test data) but also improves the perceived safety of customers and hospital staff during late-night hours.
-* **Optimize Product Assortment:** Reallocate slot ratios to increase the inventory capacity of **Caffeine products** to 80% in high-traffic, late-night zones to eliminate stockout risks during peak hospital shift hours.
-* **Leverage Upselling Opportunities:** Keep high-demand **toppings** fully stocked (especially Extra Espresso Shots), and consider bundling them into automated promotions on the machine's interface to increase the average transaction value (ATV).
+Based on the analysis, the following operational strategies are suggested:
+
+### 1. Improve Visibility in Low-Light Zones
+  * Consider installing LED lighting in underperforming machines
+  * Expected to improve visibility and potentially increase transaction volume
+### 2. Optimize Product Allocation for Night Shifts
+  * Increase allocation of caffeine-based products in high-traffic nighttime locations
+  * Reduce low-demand categories during night hours
+### 3. Enhance Upselling Strategy
+  * Promote high-performing toppings (e.g., espresso shots)
+  * Consider bundling or default recommendations for add-ons
+
+---
+
+## ⚠️ Limitations
+* Dataset is simulated and does not represent real-world transactional noise
+* No external demand factors (weather, hospital occupancy, events) included
+* A/B comparisons are observational and not statistically controlled experiments
+* Results should be interpreted as hypothesis-generating rather than causal proof
+
+---
+
+## 🧠 Tools & Stack
+* SQL (Data modeling & analysis)
+* Star Schema design
+* Aggregation & segmentation queries
+* Business logic-based optimization rules
+
+---
+
+## 📌 Conclusion
+
+This project demonstrates how vending machine performance can be analyzed through the lens of **environmental conditions, user behavior, and product mix strategy**.
+
+While based on simulated data, the framework is designed to be extendable to real-world datasets for operational decision-making and optimization.
+
+---
+
+##📎 Future Improvements
+* Incorporate real-time inventory tracking
+* Add demand forecasting model (time-series analysis)
+* Introduce statistical testing for A/B experiments
+* Build dashboard for operational monitoring (Power BI / Tableau).
+
+---
