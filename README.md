@@ -108,14 +108,14 @@ Machines equipped with LED lighting in low-light zones showed **higher sales per
 * Non-LED machine (M001 in equivalent dark zone): 2 transactions, 2 units sold, 105.00 THB revenue
 * Performance gap: **2.5× transaction frequency, 3.4× higher revenue**
 
-**Insight**: Improved visibility through LED installation may increase impulse purchasing behavior in low-light environments by 3–5×, representing a high-ROI operational intervention.
+**Insight**: The simulated dataset suggests a potential positive relationship between LED installation and sales performance in low-light environments, indicating that improved visibility could be a high-ROI operational intervention.
 
 ### 2. ☕ Night-Time Demand Patterns (23:00 - 05:00)
 Late-night sales are heavily concentrated in **caffeine-based products**, reflecting shift-worker consumption behavior.
 
 * Caffeine products dominate night-time revenue share
 * Soft drinks and juices show significantly lower demand
-* Extra espresso shots (T01) show 40% attachment rate during night hours
+* Extra espresso shots (T01) shows a notable attachment trend
 
 **Insight**: Inventory allocation for machines located in hospital corridor environments should be optimized toward caffeine-heavy product mix (60–70% shelf space) to align with observed night-time demand patterns.
 
@@ -123,7 +123,7 @@ Late-night sales are heavily concentrated in **caffeine-based products**, reflec
 Topping analysis shows meaningful attachment behavior even in low-interaction vending environments:
 
 * Extra espresso shots show the highest attachment rate
-* Add-ons contribute additional revenue per transaction (+15–20% average transaction value)
+* Add-ons show a directional increase in average transaction value within the simulated environment.
 * "No Topping" (T03) still selected in 55% of transactions (budget-conscious purchases)
 
 **Insight**: Upselling opportunities exist even in low-interaction vending environments. Strategic placement of topping prompts can increase average transaction value by 10–15%.
