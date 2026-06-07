@@ -7,9 +7,17 @@ This project demonstrates exploratory data analysis and optimization thinking ap
 
 The goal is to understand how environmental visibility, customer behavior patterns, and product mix influence sales performance and revenue distribution.
 
-The analysis is based on a simulated dataset designed to reflect realistic vending machine transactions and operational constraints, implemented using PostgreSQL 15+ with a star-schema design for scalable analytics.
+The analysis is based on a simulated dataset designed to reflect realistic vending machine transactions and operational constraints, implemented using PostgreSQL 18 with a star-schema design for scalable analytics.
 
 ---
+## Business Context
+
+Hospital corridor vending machines operate in a unique environment where visibility, shift-worker behavior, and limited inventory capacity can influence purchasing decisions. 
+
+Understanding these factors can help operators improve product placement, inventory allocation, and machine performance.
+
+---
+
 ## 🎯 Business Problem
 
 Vending machines placed in hospital walkways often operate under constraints that may affect sales performance:
@@ -27,7 +35,7 @@ This project investigates:
 ---
 ## 🧱 Data Architecture
 
-The project uses a **star-schema data model** implemented in PostgreSQL 15+ to support analytical querying across multiple dimensions: time, product, location, and environmental conditions.
+The project uses a **star-schema data model** implemented in PostgreSQL 18 to support analytical querying across multiple dimensions: time, product, location, and environmental conditions.
 
 ### Tables Overview
 
@@ -40,7 +48,7 @@ The project uses a **star-schema data model** implemented in PostgreSQL 15+ to s
 
 ### Key Design Features
 
-**PostgreSQL 15+ Capabilities Used:**
+**PostgreSQL 18 Capabilities Used:**
 - **Generated columns**: `total_price` automatically calculated as `(product_price + topping_price) * quantity`
 - **Triggers**: Automatic timestamp management for `updated_at` columns across all dimension tables
 - **Constraints**: CHECK constraints for data validation (e.g., `price >= 0`, `quantity > 0`)
@@ -106,7 +114,7 @@ Machines equipped with LED lighting in low-light zones showed **higher sales per
 
 * LED-equipped machine (M002 in dark zone): 5 transactions, 6 units sold, 465.00 THB revenue
 * Non-LED machine (M001 in equivalent dark zone): 2 transactions, 2 units sold, 105.00 THB revenue
-* Performance gap: **2.5× transaction frequency, 3.4× higher revenue**
+* Performance gap: **5 vs. 2 transactions, and 465.00 vs. 105.00 THB revenue within this simulated scenario**
 
 **Insight**: The simulated dataset suggests a potential positive relationship between LED installation and sales performance in low-light environments, indicating that improved visibility could be a high-ROI operational intervention.
 
@@ -117,16 +125,16 @@ Late-night sales are heavily concentrated in **caffeine-based products**, reflec
 * Soft drinks and juices show significantly lower demand
 * Extra espresso shots (T01) shows a notable attachment trend
 
-**Insight**: Inventory allocation for machines located in hospital corridor environments should be optimized toward caffeine-heavy product mix (60–70% shelf space) to align with observed night-time demand patterns.
+**Insight**: Inventory allocation for machines located in hospital corridor environments should prioritize caffeine-based products to align with observed night-time demand patterns.
 
 ### 3. 🎯 Product & Upsell Behavior
 Topping analysis shows meaningful attachment behavior even in low-interaction vending environments:
 
 * Extra espresso shots show the highest attachment rate
 * Add-ons show a directional increase in average transaction value within the simulated environment.
-* "No Topping" (T03) still selected in 55% of transactions (budget-conscious purchases)
+* "No Topping" (T03) is still selected in **the majority** of transactions, potentially indicating budget-conscious purchases
 
-**Insight**: Upselling opportunities exist even in low-interaction vending environments. Strategic placement of topping prompts can increase average transaction value by 10–15%.
+**Insight**: Upselling opportunities exist even in low-interaction vending environments. Strategic placement of topping prompts may increase average transaction value and warrants further testing.
 
 ---
 
@@ -136,18 +144,18 @@ Based on the analysis, the following operational strategies are suggested:
 
 ### 1. Improve Visibility in Low-Light Zones
   * Consider installing LED lighting in dark corridor machines (M001-type locations)
-  * Expected impact: 2–3× increase in transaction volume
+  * Potential impact: Increased transaction volume based on observed patterns in the simulated dataset.
   * Implementation priority: HIGH for `is_low_light = TRUE` machines
 
 ### 2. Optimize Product Allocation for Night Shifts
-  * Increase caffeine-based product allocation (60–70% shelf space) in high-traffic night locations
+  * Increase caffeine-based product allocation in high-traffic night locations
   * Reduce low-demand juice and beverage categories during evening restock cycles
   * Use Optimization.sql Query 4 (ABC Analysis) to guide restocking decisions
 
 ### 3. Enhance Upselling Strategy
   * Promote high-performing toppings (e.g., espresso shots) through signage or bundle offers
   * Target all caffeine products during night-shift hours
-  * Expected impact: 10–15% increase in average transaction value
+  * Potential impact: Higher average transaction value through increased topping adoption.
 
 ---
 
@@ -160,10 +168,10 @@ Based on the analysis, the following operational strategies are suggested:
 ---
 
 ## 🧠 Tools & Stack
-* **PostgreSQL 15+**: Database with generated columns, triggers, foreign keys, and strategic indexing
-* **SQL**: Data modeling, aggregation, time-series segmentation, and business logic rules
-* **Star Schema Design**: Dimensional modeling for scalable analytics
-* **Analytics Queries**: 10 analytical queries (Analysis.sql) + 4 optimization queries (Optimization.sql)
+* **PostgreSQL 18**: Built and validated on PostgreSQL 18, utilizing generated columns, triggers, foreign keys, and strategic indexing.
+* **SQL**: Data modeling, aggregation, time-series segmentation, business logic rules, and PostgreSQL 15+ compatible analytical query development.
+* **Star Schema Design**: Dimensional modeling for scalable analytics.
+* **Analytics Queries**: 10 analytical queries (Analysis.sql) + 4 optimization queries (Optimization.sql).
 
 ---
 
