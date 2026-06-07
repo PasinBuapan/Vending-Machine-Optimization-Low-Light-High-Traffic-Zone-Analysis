@@ -10,7 +10,7 @@ The goal is to understand how environmental visibility, customer behavior patter
 The analysis is based on a simulated dataset designed to reflect realistic vending machine transactions and operational constraints, implemented using PostgreSQL 18 with a star-schema design for scalable analytics.
 
 ---
-##🏥 Business Context
+## 🏥 Business Context
 
 Hospital corridor vending machines operate in a unique environment where visibility, shift-worker behavior, and limited inventory capacity can influence purchasing decisions. 
 
