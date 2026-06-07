@@ -171,7 +171,7 @@ Based on the analysis, the following operational strategies are suggested:
 
 This project demonstrates how vending machine performance can be analyzed through the lens of **environmental conditions, user behavior, and product mix strategy**.
 
-While based on simulated data, the framework is designed to be extendable to real-world datasets for operational decision-making and optimization. The PostgreSQL implementation provides a production-ready foundation for inventory management, performance monitoring, and location-based optimization.
+While based on simulated data, the framework is designed to be extendable to real-world datasets for operational decision-making and optimization. The PostgreSQL implementation provides a Production-inspired architecture for inventory management, performance monitoring, and location-based optimization.
 
 ---
 
