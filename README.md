@@ -10,7 +10,7 @@ The goal is to understand how environmental visibility, customer behavior patter
 The analysis is based on a simulated dataset designed to reflect realistic vending machine transactions and operational constraints, implemented using PostgreSQL 18 with a star-schema design for scalable analytics.
 
 ---
-## Business Context
+##🏥 Business Context
 
 Hospital corridor vending machines operate in a unique environment where visibility, shift-worker behavior, and limited inventory capacity can influence purchasing decisions. 
 
@@ -123,7 +123,7 @@ Late-night sales are heavily concentrated in **caffeine-based products**, reflec
 
 * Caffeine products dominate night-time revenue share
 * Soft drinks and juices show significantly lower demand
-* Extra espresso shots (T01) shows a notable attachment trend
+* Extra espresso shots (T01) show a notable attachment trend
 
 **Insight**: Inventory allocation for machines located in hospital corridor environments should prioritize caffeine-based products to align with observed night-time demand patterns.
 
@@ -168,8 +168,9 @@ Based on the analysis, the following operational strategies are suggested:
 ---
 
 ## 🧠 Tools & Stack
-* **PostgreSQL 18**: Built and validated on PostgreSQL 18, utilizing generated columns, triggers, foreign keys, and strategic indexing.
-* **SQL**: Data modeling, aggregation, time-series segmentation, business logic rules, and PostgreSQL 15+ compatible analytical query development.
+
+* **PostgreSQL 18**: Used as the primary development and validation environment.
+* **SQL**: Data modeling, aggregation, time-series segmentation, business logic implementation, and PostgreSQL-compatible analytical query development (validated on PostgreSQL 18; compatible with PostgreSQL 15+ syntax).
 * **Star Schema Design**: Dimensional modeling for scalable analytics.
 * **Analytics Queries**: 10 analytical queries (Analysis.sql) + 4 optimization queries (Optimization.sql).
 
