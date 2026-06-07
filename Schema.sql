@@ -1,132 +1,237 @@
-DROP TABLE IF EXISTS Fact_Sales;
-DROP TABLE IF EXISTS Dim_Toppings;
-DROP TABLE IF EXISTS Dim_Vending_Machines;
-DROP TABLE IF EXISTS Dim_Products;
+-- =============================================
+-- PostgreSQL 15+ Vending Machine Sales Schema
+-- Refactored from MySQL with full PostgreSQL compatibility
+-- Naming convention: lowercase_snake_case
+-- =============================================
+
+DROP TABLE IF EXISTS fact_sales;
+DROP TABLE IF EXISTS dim_toppings;
+DROP TABLE IF EXISTS dim_vending_machines;
+DROP TABLE IF EXISTS dim_products;
 
 -- =============================================
--- 1. สร้างตารางข้อมูลสินค้า (Dimension: Products)
--- วัตถุประสงค์: เก็บข้อมูลสินค้า ราคา และประเภท
+-- 1. Dimension Table: Products
+-- Purpose: Store product information, pricing, and categories
 -- =============================================
-CREATE TABLE Dim_Products (
+CREATE TABLE dim_products (
     product_id VARCHAR(10) PRIMARY KEY,
     product_name VARCHAR(100) NOT NULL,
-    category VARCHAR(50) NOT NULL COMMENT 'เช่น Caffeine, Juice, Soft Drink',
+    category VARCHAR(50) NOT NULL,
     price DECIMAL(10, 2) NOT NULL CHECK (price >= 0),
-    menu_type VARCHAR(20) NOT NULL COMMENT 'เช่น Hot, Cold',
+    menu_type VARCHAR(20) NOT NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+COMMENT ON TABLE dim_products IS 'Dimension table containing product master data';
+COMMENT ON COLUMN dim_products.product_id IS 'Unique product identifier';
+COMMENT ON COLUMN dim_products.product_name IS 'Display name of the product';
+COMMENT ON COLUMN dim_products.category IS 'Product category (e.g., Caffeine, Juice, Soft Drink)';
+COMMENT ON COLUMN dim_products.price IS 'Base selling price in Thai Baht, must be non-negative';
+COMMENT ON COLUMN dim_products.menu_type IS 'Service type (e.g., Hot, Cold)';
+COMMENT ON COLUMN dim_products.is_active IS 'Active status flag for operational filtering';
+COMMENT ON COLUMN dim_products.created_at IS 'Record creation timestamp';
+COMMENT ON COLUMN dim_products.updated_at IS 'Record last update timestamp';
+
 -- =============================================
--- 2. สร้างตารางข้อมูลตู้กดน้ำและทำเลที่ตั้ง (Dimension: Vending Machines)
--- วัตถุประสงค์: จดบันทึกข้อมูลตู้ สถานที่ และความสว่าง (เพื่อทดลองใช้ LED)
+-- 2. Dimension Table: Vending Machines
+-- Purpose: Store vending machine configuration, location, and LED lighting trial status
 -- =============================================
-CREATE TABLE Dim_Vending_Machines (
+CREATE TABLE dim_vending_machines (
     machine_id VARCHAR(10) PRIMARY KEY,
-    location_zone VARCHAR(100) NOT NULL COMMENT 'เช่น Emergency Room, OPD, Walkway',
-    is_low_light BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'True = มุมมืด / False = สว่างปกติ',
-    has_led_strip BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'True = ติดไฟ LED แล้ว / False = ยังไม่ติด',
+    location_zone VARCHAR(100) NOT NULL,
+    is_low_light BOOLEAN NOT NULL DEFAULT FALSE,
+    has_led_strip BOOLEAN NOT NULL DEFAULT FALSE,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+COMMENT ON TABLE dim_vending_machines IS 'Dimension table containing vending machine master data';
+COMMENT ON COLUMN dim_vending_machines.machine_id IS 'Unique machine identifier';
+COMMENT ON COLUMN dim_vending_machines.location_zone IS 'Physical location within the hospital (e.g., Emergency Room, OPD, Walkway)';
+COMMENT ON COLUMN dim_vending_machines.is_low_light IS 'Flag indicating low-light environment (True=dark, False=normal lighting)';
+COMMENT ON COLUMN dim_vending_machines.has_led_strip IS 'Flag indicating LED lighting installation (True=installed, False=not installed)';
+COMMENT ON COLUMN dim_vending_machines.is_active IS 'Operational status flag';
+COMMENT ON COLUMN dim_vending_machines.created_at IS 'Record creation timestamp';
+COMMENT ON COLUMN dim_vending_machines.updated_at IS 'Record last update timestamp';
+
 -- =============================================
--- 3. สร้างตารางท็อปปิ้ง (Dimension: Toppings)
--- วัตถุประสงค์: เก็บรายละเอียดท็อปปิ้งและราคาเพิ่มเติม
+-- 3. Dimension Table: Toppings
+-- Purpose: Store topping options and additional pricing
 -- =============================================
-CREATE TABLE Dim_Toppings (
+CREATE TABLE dim_toppings (
     topping_id VARCHAR(10) PRIMARY KEY,
     topping_name VARCHAR(100) NOT NULL,
     extra_price DECIMAL(10, 2) NOT NULL DEFAULT 0.00 CHECK (extra_price >= 0),
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+COMMENT ON TABLE dim_toppings IS 'Dimension table containing topping options';
+COMMENT ON COLUMN dim_toppings.topping_id IS 'Unique topping identifier';
+COMMENT ON COLUMN dim_toppings.topping_name IS 'Display name of the topping';
+COMMENT ON COLUMN dim_toppings.extra_price IS 'Additional price for topping in Thai Baht';
+COMMENT ON COLUMN dim_toppings.is_active IS 'Active status flag';
+COMMENT ON COLUMN dim_toppings.created_at IS 'Record creation timestamp';
+COMMENT ON COLUMN dim_toppings.updated_at IS 'Record last update timestamp';
+
 -- =============================================
--- 4. สร้างตารางธุรกรรมการขาย (Fact Table)
--- วัตถุประสงค์: บันทึกทุกการกดน้ำ (sales transaction) พร้อมข้อมูลเวลา สินค้า และราคา
+-- 4. Fact Table: Sales Transactions
+-- Purpose: Record all beverage sales transactions with temporal, product, and financial data
 -- =============================================
-CREATE TABLE Fact_Sales (
-    transaction_id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'รหัสธุรกรรม (ระบบอัตโนมัติ)',
+CREATE TABLE fact_sales (
+    transaction_id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
     machine_id VARCHAR(10) NOT NULL,
     product_id VARCHAR(10) NOT NULL,
-    topping_id VARCHAR(10) NOT NULL DEFAULT 'T03' COMMENT 'T03 = ไม่เพิ่มท็อปปิ้ง',
-    sale_timestamp DATETIME NOT NULL COMMENT 'วันและเวลาที่กดน้ำ',
+    topping_id VARCHAR(10) NOT NULL DEFAULT 'T03',
+    sale_timestamp TIMESTAMP NOT NULL,
     quantity INT NOT NULL DEFAULT 1 CHECK (quantity > 0),
-    product_price DECIMAL(10, 2) NOT NULL COMMENT 'ราคาสินค้า (ณ เวลาซื้อ)',
-    topping_price DECIMAL(10, 2) NOT NULL DEFAULT 0.00 COMMENT 'ราคาท็อปปิ้ง',
-    total_price DECIMAL(10, 2) NOT NULL GENERATED ALWAYS AS (product_price + topping_price) * quantity STORED COMMENT 'ราคารวม',
-    status VARCHAR(20) NOT NULL DEFAULT 'completed' COMMENT 'completed, refunded, error',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    product_price DECIMAL(10, 2) NOT NULL,
+    topping_price DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    total_price DECIMAL(10, 2) NOT NULL GENERATED ALWAYS AS ((product_price + topping_price) * quantity) STORED,
+    status VARCHAR(20) NOT NULL DEFAULT 'completed',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
-    -- Foreign Keys
-    FOREIGN KEY (machine_id) REFERENCES Dim_Vending_Machines(machine_id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES Dim_Products(product_id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (topping_id) REFERENCES Dim_Toppings(topping_id) ON DELETE RESTRICT ON UPDATE CASCADE
+    -- Foreign Key Constraints
+    CONSTRAINT fk_fact_sales_machine_id FOREIGN KEY (machine_id) 
+        REFERENCES dim_vending_machines(machine_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_fact_sales_product_id FOREIGN KEY (product_id) 
+        REFERENCES dim_products(product_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_fact_sales_topping_id FOREIGN KEY (topping_id) 
+        REFERENCES dim_toppings(topping_id) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
--- =============================================
--- สร้าง Indexes สำหรับ Performance
--- =============================================
-CREATE INDEX idx_sales_machine ON Fact_Sales(machine_id);
-CREATE INDEX idx_sales_product ON Fact_Sales(product_id);
-CREATE INDEX idx_sales_topping ON Fact_Sales(topping_id);
-CREATE INDEX idx_sales_timestamp ON Fact_Sales(sale_timestamp);
-CREATE INDEX idx_sales_status ON Fact_Sales(status);
-CREATE INDEX idx_products_category ON Dim_Products(category);
-CREATE INDEX idx_machines_location ON Dim_Vending_Machines(location_zone);
+COMMENT ON TABLE fact_sales IS 'Fact table recording all beverage sales transactions';
+COMMENT ON COLUMN fact_sales.transaction_id IS 'Unique transaction identifier, system-generated';
+COMMENT ON COLUMN fact_sales.machine_id IS 'Reference to vending machine';
+COMMENT ON COLUMN fact_sales.product_id IS 'Reference to product sold';
+COMMENT ON COLUMN fact_sales.topping_id IS 'Reference to topping option (T03 = no topping)';
+COMMENT ON COLUMN fact_sales.sale_timestamp IS 'Date and time of transaction';
+COMMENT ON COLUMN fact_sales.quantity IS 'Number of units sold, must be positive';
+COMMENT ON COLUMN fact_sales.product_price IS 'Base product price at time of sale';
+COMMENT ON COLUMN fact_sales.topping_price IS 'Topping surcharge at time of sale';
+COMMENT ON COLUMN fact_sales.total_price IS 'Calculated total transaction value: (product_price + topping_price) * quantity';
+COMMENT ON COLUMN fact_sales.status IS 'Transaction status: completed, refunded, or error';
+COMMENT ON COLUMN fact_sales.created_at IS 'Record creation timestamp';
 
 -- =============================================
--- เพิ่มข้อมูลสินค้า (Dim_Products)
+-- Create Update Trigger for dim_products.updated_at
+-- PostgreSQL equivalent of MySQL ON UPDATE CURRENT_TIMESTAMP
 -- =============================================
-INSERT INTO Dim_Products (product_id, product_name, category, price, menu_type) VALUES
-('P001', 'Espresso เย็น', 'Caffeine', 50.00, 'Cold'),
-('P002', 'อเมริกาโน่ร้อน', 'Caffeine', 40.00, 'Hot'),
-('P003', 'ชาเขียวนมเย็น', 'Soft Drink', 45.00, 'Cold'),
-('P004', 'น้ำส้มคั้น 100%', 'Juice', 35.00, 'Cold'),
-('P005', 'นมสดร้อน', 'Soft Drink', 30.00, 'Hot');
+CREATE OR REPLACE FUNCTION update_dim_products_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_dim_products_updated_at
+BEFORE UPDATE ON dim_products
+FOR EACH ROW
+EXECUTE FUNCTION update_dim_products_timestamp();
 
 -- =============================================
--- เพิ่มข้อมูลท็อปปิ้ง (Dim_Toppings)
+-- Create Update Trigger for dim_vending_machines.updated_at
 -- =============================================
-INSERT INTO Dim_Toppings (topping_id, topping_name, extra_price) VALUES
-('T01', 'เพิ่มช็อตกาแฟ', 15.00),
-('T02', 'บุกไข่มุก', 10.00),
-('T03', 'ไม่เพิ่มท็อปปิ้ง', 0.00);
+CREATE OR REPLACE FUNCTION update_dim_vending_machines_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_dim_vending_machines_updated_at
+BEFORE UPDATE ON dim_vending_machines
+FOR EACH ROW
+EXECUTE FUNCTION update_dim_vending_machines_timestamp();
 
 -- =============================================
--- เพิ่มข้อมูลตู้กดน้ำ (Dim_Vending_Machines)
+-- Create Update Trigger for dim_toppings.updated_at
 -- =============================================
--- จุดประสงค์: เปรียบเทียบ
---   - M001: มุมมืดสนิท (ไม่มีไฟ LED) = ควรขายน้อยลง
---   - M002: มุมมืดแต่ติดไฟ LED = ควรขายเพิ่มขึ้น
---   - M003: สว่างปกติ = ควรเป็น baseline
-INSERT INTO Dim_Vending_Machines (machine_id, location_zone, is_low_light, has_led_strip) VALUES
-('M001', 'ทางเชื่อมอาคารเก่า (มุมมืด)', TRUE, FALSE),
-('M002', 'หน้าแผนกผู้ป่วยนอก (มุมมืด-ทดลองติดไฟ LED)', TRUE, TRUE),
-('M003', 'โถงกลางอาคาร 1 (สว่างปกติ)', FALSE, FALSE);
+CREATE OR REPLACE FUNCTION update_dim_toppings_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_dim_toppings_updated_at
+BEFORE UPDATE ON dim_toppings
+FOR EACH ROW
+EXECUTE FUNCTION update_dim_toppings_timestamp();
 
 -- =============================================
--- เพิ่มข้อมูลการขาย (Fact_Sales)
+-- Create Indexes for Performance Optimization
 -- =============================================
--- จำลองสถานการณ์ช่วงกะดึก (23.00 - 05.00 น.) ของวันที่ 23 พฤษภาคม 2026
--- กลุ่ม 1: ตู้ M001 (มืดสนิท) - ขายน้อย
-INSERT INTO Fact_Sales (machine_id, product_id, topping_id, sale_timestamp, quantity, product_price, topping_price, status) VALUES
+CREATE INDEX idx_fact_sales_machine_id ON fact_sales(machine_id);
+CREATE INDEX idx_fact_sales_product_id ON fact_sales(product_id);
+CREATE INDEX idx_fact_sales_topping_id ON fact_sales(topping_id);
+CREATE INDEX idx_fact_sales_sale_timestamp ON fact_sales(sale_timestamp);
+CREATE INDEX idx_fact_sales_status ON fact_sales(status);
+CREATE INDEX idx_dim_products_category ON dim_products(category);
+CREATE INDEX idx_dim_vending_machines_location_zone ON dim_vending_machines(location_zone);
+
+-- =============================================
+-- Composite Index for Common Query Patterns
+-- =============================================
+CREATE INDEX idx_fact_sales_machine_timestamp ON fact_sales(machine_id, sale_timestamp);
+CREATE INDEX idx_fact_sales_product_timestamp ON fact_sales(product_id, sale_timestamp);
+
+-- =============================================
+-- Insert Master Data: Products (dim_products)
+-- =============================================
+INSERT INTO dim_products (product_id, product_name, category, price, menu_type) VALUES
+('P001', 'Espresso Cold', 'Caffeine', 50.00, 'Cold'),
+('P002', 'Americano Hot', 'Caffeine', 40.00, 'Hot'),
+('P003', 'Green Tea Milk Cold', 'Soft Drink', 45.00, 'Cold'),
+('P004', 'Fresh Orange Juice 100%', 'Juice', 35.00, 'Cold'),
+('P005', 'Fresh Milk Hot', 'Soft Drink', 30.00, 'Hot');
+
+-- =============================================
+-- Insert Master Data: Toppings (dim_toppings)
+-- =============================================
+INSERT INTO dim_toppings (topping_id, topping_name, extra_price) VALUES
+('T01', 'Extra Coffee Shot', 15.00),
+('T02', 'Tapioca Pearls', 10.00),
+('T03', 'No Topping', 0.00);
+
+-- =============================================
+-- Insert Master Data: Vending Machines (dim_vending_machines)
+-- =============================================
+-- Purpose: Compare LED lighting impact in low-light environments
+--   - M001: Dark corner without LED = expected lower sales
+--   - M002: Dark corner with LED = expected higher sales (LED trial)
+--   - M003: Normal bright location = baseline for comparison
+INSERT INTO dim_vending_machines (machine_id, location_zone, is_low_light, has_led_strip) VALUES
+('M001', 'Old Building Connector (Dark)', TRUE, FALSE),
+('M002', 'OPD Front Desk (Dark - LED Trial)', TRUE, TRUE),
+('M003', 'Building 1 Main Corridor (Well-lit)', FALSE, FALSE);
+
+-- =============================================
+-- Insert Sample Data: Sales Transactions (fact_sales)
+-- =============================================
+-- Simulated night shift period (23:00 - 05:00 hrs) for May 23, 2026
+
+-- Group 1: Machine M001 (dark, no LED) - low sales expected
+INSERT INTO fact_sales (machine_id, product_id, topping_id, sale_timestamp, quantity, product_price, topping_price, status) VALUES
 ('M001', 'P001', 'T03', '2026-05-23 01:15:00', 1, 50.00, 0.00, 'completed'),
 ('M001', 'P002', 'T01', '2026-05-23 03:40:00', 1, 40.00, 15.00, 'completed');
 
--- กลุ่ม 2: ตู้ M002 (มืด+LED) - ขายดี
-INSERT INTO Fact_Sales (machine_id, product_id, topping_id, sale_timestamp, quantity, product_price, topping_price, status) VALUES
+-- Group 2: Machine M002 (dark, with LED) - high sales expected
+INSERT INTO fact_sales (machine_id, product_id, topping_id, sale_timestamp, quantity, product_price, topping_price, status) VALUES
 ('M002', 'P001', 'T01', '2026-05-23 00:30:00', 1, 50.00, 15.00, 'completed'),
 ('M002', 'P001', 'T03', '2026-05-23 01:45:00', 2, 50.00, 0.00, 'completed'),
 ('M002', 'P002', 'T03', '2026-05-23 02:20:00', 1, 40.00, 0.00, 'completed'),
 ('M002', 'P005', 'T03', '2026-05-23 03:10:00', 1, 30.00, 0.00, 'completed'),
 ('M002', 'P001', 'T01', '2026-05-23 04:15:00', 1, 50.00, 15.00, 'completed');
 
--- กลุ่ม 3: ตู้ M003 (สว่างปกติ) - ขายดี
-INSERT INTO Fact_Sales (machine_id, product_id, topping_id, sale_timestamp, quantity, product_price, topping_price, status) VALUES
+-- Group 3: Machine M003 (bright, baseline) - normal sales expected
+INSERT INTO fact_sales (machine_id, product_id, topping_id, sale_timestamp, quantity, product_price, topping_price, status) VALUES
 ('M003', 'P003', 'T02', '2026-05-23 11:30:00', 1, 45.00, 10.00, 'completed'),
 ('M003', 'P004', 'T03', '2026-05-23 13:15:00', 2, 35.00, 0.00, 'completed');
