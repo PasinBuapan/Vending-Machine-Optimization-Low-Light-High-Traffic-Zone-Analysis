@@ -103,13 +103,13 @@ The analysis follows a structured approach:
 
 ---
 ## 📊 Key Insights
+🔗 [Click here to view Live Demo & Run Code on Google Colab](https://colab.research.google.com/drive/15jbEH3-GUm7wu2E5CMUJinTVOpVuKLNi?usp=sharing)
 
 | ⚠️ Note: Results are based on simulated data and should be interpreted as directional insights.
 
+<img width="558" height="393" alt="Mock data (Graph)" src="https://github.com/user-attachments/assets/56d48669-92d3-40f5-94ac-99f73201269e" />
+
 ### 💡 1. Visibility and Sales Performance (LED Hypothesis)
-
-<img width="1201" height="551" alt="image" src="https://github.com/user-attachments/assets/951114ce-69ad-47be-b9d5-4146f8056d89" />
-
 
 Machines equipped with LED lighting in low-light zones showed **higher sales performance compared to non-LED machines** in the simulated dataset.
 
