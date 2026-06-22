@@ -209,8 +209,8 @@ INSERT INTO dim_toppings (topping_id, topping_name, extra_price) VALUES
 --   - M002: Dark corner with LED = expected higher sales (LED trial)
 --   - M003: Normal bright location = baseline for comparison
 INSERT INTO dim_vending_machines (machine_id, location_zone, is_low_light, has_led_strip) VALUES
-('M001', 'Old Building Connector (Dark)', TRUE, FALSE),
-('M002', 'OPD Front Desk (Dark - LED Trial)', TRUE, TRUE),
+('M001', 'OPD Front Desk (Dark)', TRUE, FALSE),
+('M002', 'Old Building Connector (Dark - LED Trial)', TRUE, TRUE),
 ('M003', 'Building 1 Main Corridor (Well-lit)', FALSE, FALSE);
 
 -- =============================================
